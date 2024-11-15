@@ -1,4 +1,5 @@
 from random import shuffle
+from JugadorSintetico import JugadorSintetico
 from Mazo import Mazo
 from Jugador import Jugador
 
@@ -29,32 +30,37 @@ class UnoFlip:
 
     def jugar_turno(self):
         jugador = self.jugadores[self.turno_actual]
-        print(f"\nTurno del jugador: {jugador}")
-        print(f"Cartas en mano: {', '.join(str(carta) for carta in jugador.cartas)}")
-        print(f"Carta en la pila de descarte: {self.pila_descartes[-1]}")
+        carta_actual = self.pila_descartes[-1]
 
-        if jugador.cartas:
-            carta_jugada = jugador.jugar_carta(0)  # Juega la primera carta
-            print(f"{jugador.nombre} juega: {carta_jugada}")
+        if isinstance(jugador, JugadorSintetico):
+            carta_jugada = jugador.jugar_turno(carta_actual, self.estado_actual, self.mazo)
+        else:
+            print(f"\nTurno del jugador: {jugador}")
+            print(f"Cartas en mano: {', '.join(str(carta) for carta in jugador.cartas)}")
+            print(f"Carta en la pila de descarte: {carta_actual}")
 
-            # Cambiar el estado del juego si se juega una carta de tipo Flip
+            if jugador.cartas:
+                carta_jugada = jugador.jugar_carta(0)  # Juega la primera carta manualmente
+                print(f"{jugador.nombre} juega: {carta_jugada}")
+            else:
+                print(f"{jugador.nombre} no tiene cartas para jugar.")
+                carta_jugada = None
+
+        if carta_jugada:
+            # Manejar la carta jugada
             if carta_jugada.valor == 'Flip':
-                carta_jugada.voltear()  # Voltear la carta
                 self.estado_actual = 'oscuro' if self.estado_actual == 'luminoso' else 'luminoso'
                 print(f"El estado del juego cambia a: {self.estado_actual}")
-
             self.pila_descartes.append(carta_jugada)
-            print("-------------------------------------------")  # Línea separadora
-        else:
-            print(f"{jugador.nombre} no tiene cartas para jugar.")
 
         # Comprobar si el jugador ha ganado
-        if not jugador.cartas:  # Si el jugador no tiene cartas
+        if not jugador.cartas:
             print(f"{jugador.nombre} ha ganado el juego!")
-            return True  # Retornar True para indicar que hay un ganador
+            return True  # Terminar el juego
 
+        # Pasar al siguiente turno
         self.turno_actual = (self.turno_actual + 1) % len(self.jugadores)
-        return False  # Retornar False si no hay un ganador
+        return False
 
     def fin_del_juego(self):
         # Comprobar si algún jugador ha ganado
