@@ -3,22 +3,25 @@ from Carta import Carta
 
 class Mazo:
     def __init__(self):
-        self.cartas = self.crear_mazo()  # Inicializa el mazo
+        self.cartas = self.crear_mazo()
 
     def crear_mazo(self):
-        colores = ['Rojo', 'Verde', 'Azul', 'Amarillo']
-        valores_luminosos = ['Wild', 'Wild Draw Two', 'Draw One', 'Flip', 'Reverse', 'Skip']
-        valores_oscuros = ['Wild', 'Wild Draw Color', 'Draw Five', 'Flip', 'Reverse', 'Skip Everyone']
+        # Colores y valores definidos para las cartas luminosas y oscuras
+        colores_luminosos = ['Rojo', 'Verde', 'Azul', 'Amarillo']
+        valores_luminosos = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Wild', 'Wild Draw Four', 'Draw Two', 'Flip', 'Reverse', 'Skip']
+
+        colores_oscuros = ['Rosado', 'Naranja', 'Morado', 'Turquesa']
+        valores_oscuros = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Wild', 'Wild Draw Color', 'Draw Five', 'Flip', 'Reverse', 'Skip Everyone']
 
         mazo = []
 
         # Crear cartas luminosas
-        for color in colores:
+        for color in colores_luminosos:
             for valor in valores_luminosos:
                 mazo.append(Carta(color, valor, es_accion=True, lado="luminoso"))
-        
+
         # Crear cartas oscuras
-        for color in colores:
+        for color in colores_oscuros:
             for valor in valores_oscuros:
                 mazo.append(Carta(color, valor, es_accion=True, lado="oscuro"))
 
@@ -28,4 +31,5 @@ class Mazo:
         if self.cartas:
             return self.cartas.pop()
         else:
-            return None  # En caso de que el mazo esté vacío
+            print("El mazo está vacío.")
+            return None
