@@ -6,34 +6,52 @@ class JugadorSintetico(Jugador):
         super().__init__(nombre)
 
     def elegir_carta(self, carta_actual, estado_actual):
-        # Filtrar cartas compatibles
+        # Filtrar cartas compatibles por color, valor o si son Wild
         compatibles = [
             carta for carta in self.cartas
-            if carta.color == carta_actual.color or carta.valor == carta_actual.valor or carta.valor == "Wild"
+            if carta.color == carta_actual.color or carta.valor == carta_actual.valor or carta.valor in ["Wild", "Wild Draw Four"]
         ]
-        
-        # Priorizar cartas especiales
+
+        if not compatibles:
+            # Si no hay cartas compatibles, devuelve None (no puede jugar)
+            return None
+
+        # Priorizar cartas Wild si están disponibles
+        wild_cards = [carta for carta in compatibles if carta.valor in ["Wild", "Wild Draw Four"]]
+        if wild_cards:
+            return wild_cards[0]  # Jugar la primera Wild disponible
+
+        # Luego, buscar cartas de acción especiales (Draw Two, Reverse, Skip)
         especiales = [carta for carta in compatibles if carta.es_accion]
-
-        # Seleccionar la carta a jugar
         if especiales:
-            return especiales[0]  # Priorizar la primera carta especial disponible
-        elif compatibles:
-            return compatibles[0]  # Jugar la primera carta compatible
-        else:
-            return None  # No hay carta para jugar
+            return especiales[0]  # Jugar la primera carta especial disponible
 
-    def elegir_color_wild(self):
-        # Contar cuántas veces aparece cada color en las cartas del jugador
-        colores = [carta.color for carta in self.cartas if carta.color != 'Wild']
+        # Por último, jugar la primera carta compatible numérica
+        return compatibles[0]
+
+    def elegir_color_wild(self, estado_juego):
+        # Colores posibles según el estado del juego
+        colores_posibles = {
+            "luminoso": ['Rojo', 'Verde', 'Azul', 'Amarillo'],
+            "oscuro": ['Rosado', 'Naranja', 'Morado', 'Turquesa']
+        }
+
+        # Obtener los colores compatibles con el estado actual
+        esquema_colores = colores_posibles.get(estado_juego, colores_posibles["luminoso"])
+
+        # Contar los colores de las cartas en mano, excluyendo Wild y ajustando al esquema actual
+        colores = [carta.color for carta in self.cartas if carta.color in esquema_colores]
+
         if colores:
+            # Contar la frecuencia de los colores en la mano
             contador_colores = Counter(colores)
-            # Seleccionar el color más frecuente
+            # Elegir el color más frecuente
             color_mas_frecuente = contador_colores.most_common(1)[0][0]
             return color_mas_frecuente
         else:
-            # Si no hay cartas de color (todos son Wild), elige uno al azar
-            return 'Rojo'  # Elegir un color predeterminado en caso de que no haya colores normales
+            # Si no hay colores en mano, elegir el primer color del esquema como predeterminado
+            return esquema_colores[0]
+
 
     def jugar_turno(self, carta_actual, estado_actual, mazo):
         print(f"\nTurno del jugador sintético: {self.nombre}")
@@ -44,19 +62,20 @@ class JugadorSintetico(Jugador):
         carta_elegida = self.elegir_carta(carta_actual, estado_actual)
 
         if carta_elegida:
-            # Si la carta es Wild, elige un color automáticamente basado en las cartas del jugador
-            if carta_elegida.valor in ["Wild", "Wild Draw Color", "Wild Draw Two"]:
-                print(f"{self.nombre} juega una carta Wild. Seleccionando un color...")
-                color_elegido = self.elegir_color_wild()
-                carta_actual.color = color_elegido
-                print(f"El color del juego ahora es: {color_elegido}")
+            # Si la carta es Wild, se selecciona un color una vez
+            if carta_elegida.valor in ["Wild", "Wild Draw Four", "Wild Draw Color"]:
+                color_elegido = self.elegir_color_wild(estado_actual)  # Selección de color
+                carta_elegida.color = color_elegido  # Asignar el color a la carta Wild
+                print(f"{self.nombre} juega una carta Wild. El color del juego ahora es: {color_elegido}")
                 
-            self.cartas.remove(carta_elegida)  # Remover la carta elegida de la mano
+            # Eliminar la carta elegida de la mano
+            self.cartas.remove(carta_elegida)
             return carta_elegida
         else:
-            # Robar una carta si no tiene jugada posible
+            # Si no tiene carta para jugar, roba una carta
             nueva_carta = mazo.sacar_carta()
             if nueva_carta:
                 self.agregar_carta(nueva_carta)
                 print(f"{self.nombre} no tiene cartas para jugar. Roba una carta: {nueva_carta}")
             return None
+
