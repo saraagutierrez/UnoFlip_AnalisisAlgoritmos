@@ -1,7 +1,6 @@
 from JugadorSintetico import JugadorSintetico
 from Mazo import Mazo
 from Jugador import Jugador
-import random
 
 class UnoFlip:
     def __init__(self, jugadores):

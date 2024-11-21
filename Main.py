@@ -3,7 +3,6 @@ from JugadorSintetico import JugadorSintetico
 from Juego import UnoFlip
 
 def obtener_jugadores():
-    """Solicita y configura los jugadores para el juego."""
     while True:
         try:
             num_jugadores = int(input("Ingrese el número de jugadores (mínimo 2, máximo 10): "))
@@ -40,7 +39,6 @@ def obtener_jugadores():
     return jugadores
 
 def main():
-    """Punto de entrada principal para iniciar el juego."""
     print("¡Bienvenido a Uno Flip!")
     jugadores = obtener_jugadores()
     juego = UnoFlip(jugadores)
